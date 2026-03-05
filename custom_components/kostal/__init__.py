@@ -1,19 +1,29 @@
-"""The kostal component."""
+"""The Kostal PIKO inverter sensor integration."""
+
+import logging
 import voluptuous as vol
 
+from .piko_holder import PikoHolder
 
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.const import (
-    CONF_NAME,
-    CONF_HOST,
     CONF_USERNAME,
     CONF_PASSWORD,
+    CONF_HOST,
+    CONF_NAME,
     CONF_MONITORED_CONDITIONS,
+    EVENT_HOMEASSISTANT_STOP,
 )
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.dispatcher import async_dispatcher_send
 import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.typing import HomeAssistantType
 
 from .const import DEFAULT_NAME, DOMAIN, SENSOR_TYPES
+
+_LOGGER = logging.getLogger(__name__)
+
+__version__ = "1.2.0"
+VERSION = __version__
 
 CONFIG_SCHEMA = vol.Schema(
     {
@@ -34,9 +44,14 @@ CONFIG_SCHEMA = vol.Schema(
 
 
 async def async_setup(hass, config):
-    """Platform setup, do nothing."""
+    """Set up this integration using yaml."""
+    _LOGGER.info("Setup kostal, %s", __version__)
     if DOMAIN not in config:
         return True
+
+    data = dict(config.get(DOMAIN))
+
+    hass.data["yaml_kostal"] = data
 
     hass.async_create_task(
         hass.config_entries.flow.async_init(
@@ -46,9 +61,76 @@ async def async_setup(hass, config):
     return True
 
 
-async def async_setup_entry(hass: HomeAssistantType, entry: ConfigEntry):
-    """Load the saved entities."""
-    hass.async_create_task(
-        hass.config_entries.async_forward_entry_setup(entry, "sensor")
-    )
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
+    """Setup KostalPiko component."""
+
+    _LOGGER.info("Starting kostal, %s", __version__)
+
+    if DOMAIN not in hass.data:
+        hass.data[DOMAIN] = {}
+
+    if entry.source == "import":
+        if entry.options:  # config.yaml
+            data = entry.options.copy()
+        else:
+            if "yaml_kostal" in hass.data:
+                data = hass.data["yaml_kostal"]
+            else:
+                data = {}
+        await hass.config_entries.async_remove(entry.entry_id)
+    else:
+        data = entry.data.copy()
+        data.update(entry.options)
+
+    hass.data[DOMAIN][entry.entry_id] = KostalInstance(hass, entry, data)
     return True
+
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
+    """Unload a config entry."""
+    instance = hass.data[DOMAIN][entry.entry_id]
+    await instance.stop()
+    await instance.clean()
+    return True
+
+
+class KostalInstance:
+    """Config instance of Kostal."""
+
+    def __init__(self, hass: HomeAssistant, entry: ConfigEntry, conf):
+        """Initialize KostalInstance."""
+        self.hass = hass
+        self.config_entry = entry
+        self.entry_id = self.config_entry.entry_id
+        self.conf = conf
+        self.piko = PikoHolder(
+            conf[CONF_HOST], conf[CONF_USERNAME], conf[CONF_PASSWORD]
+        )
+
+        hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, self.stop)
+
+        hass.loop.create_task(self.start_up())
+
+    async def start_up(self):
+        """Start up the Kostal instance."""
+        await self.hass.async_add_executor_job(self.piko.update)
+        self.add_sensors(self.conf[CONF_MONITORED_CONDITIONS], self.piko)
+
+    async def stop(self, _=None):
+        """Stop Kostal."""
+        _LOGGER.info("Shutting down Kostal")
+
+    def add_sensors(self, sensors, piko: PikoHolder):
+        """Add sensors."""
+        self.hass.add_job(self._asyncadd_sensors(sensors, piko))
+
+    async def _asyncadd_sensors(self, sensors, piko: PikoHolder):
+        """Add sensors asynchronously."""
+        await self.hass.config_entries.async_forward_entry_setups(
+            self.config_entry, ["sensor"]
+        )
+        async_dispatcher_send(self.hass, "kostal_init_sensors", sensors, piko)
+
+    async def clean(self):
+        """Clean up."""
+        pass

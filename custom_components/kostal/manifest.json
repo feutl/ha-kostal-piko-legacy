@@ -1,10 +1,10 @@
 {
   "domain": "kostal",
-  "name": "Kostal",
-  "version": "1.0.0",
+  "name": "Kostal Piko",
+  "version": "1.2.0",
   "config_flow": true,
   "documentation": "https://github.com/gieljnssns/kostalpiko-sensor-homeassistant",
-  "requirements": ["kostalpyko==0.5"],
+  "requirements": ["kostalpiko>=0.6"],
   "ssdp": [],
   "zeroconf": [],
   "homekit": {},

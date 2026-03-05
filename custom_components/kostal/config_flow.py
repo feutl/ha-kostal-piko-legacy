@@ -1,9 +1,10 @@
-"""Config flow for Kostal piko integration."""
-from kostalpyko.kostalpyko import Piko
+"""Adds config flow for Kostal."""
 
-# import logging
-
+import logging
 import voluptuous as vol
+
+from kostalpiko.kostalpiko import Piko
+
 from requests.exceptions import HTTPError, ConnectTimeout
 
 from homeassistant import config_entries, exceptions
@@ -19,19 +20,18 @@ from homeassistant.const import (
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.util import slugify
 
-from .const import DOMAIN, DEFAULT_NAME, SENSOR_TYPES  # pylint:disable=unused-import
-
-
-# DATA_SCHEMA = vol.Schema({"host": str, "username": str, "password": str})
+from .const import DOMAIN, DEFAULT_NAME, SENSOR_TYPES
 
 SUPPORTED_SENSOR_TYPES = list(SENSOR_TYPES)
 
 DEFAULT_MONITORED_CONDITIONS = [
-    "current power",
-    "total energy",
-    "daily energy",
+    "current_power",
+    "total_energy",
+    "daily_energy",
     "status",
 ]
+
+_LOGGER = logging.getLogger(__name__)
 
 
 @callback
@@ -49,14 +49,8 @@ class KostalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_POLL
 
-    # @staticmethod
-    # @callback
-    # def async_get_options_flow(config_entry):
-    #     """Get the options flow for this handler."""
-    #     return KostalOptionsFlowHandler(config_entry)
-
-    def __init__(self) -> None:
-        """Initialize the config flow."""
+    def __init__(self):
+        """Initialize."""
         self._errors = {}
 
     def _host_in_configuration_exists(self, host) -> bool:
