@@ -1,5 +1,7 @@
 {
   "name": "Kostal Piko (legacy)",
   "render_readme": true,
-  "domains": ["sensor"]
+  "domains": ["sensor"],
+  "homeassistant": "2021.12.0",
+  "iot_class": "local_polling"
 }

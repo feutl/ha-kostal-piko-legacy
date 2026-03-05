@@ -1,28 +1,85 @@
-## I will archive this custom component since my Kostal inverter is broken and I can not test any changes, you should try https://github.com/rcasula/kostalpiko-homeassistant
+# Kostal Piko Legacy - Home Assistant Integration
 
-# kostalpiko-sensor-homeassistant
-A custom component to get the readings of a Kostal Piko inverter NOT the Plenticore inverter
+A Home Assistant custom component for monitoring Kostal Piko solar inverters (NOT the Plenticore models).
 
-Since the component is based on web scraping from the web server interface, your web server should look like this.
-You can try like this
+> **Note:** This integration is for legacy Kostal Piko inverters. If you have a Kostal Plenticore inverter, please use a different integration.
+
+## About
+
+This custom component integrates Kostal Piko inverters with Home Assistant, providing real-time monitoring of power generation, energy production, voltage, current, and system status.
+
+**Based on code from:**
+- https://github.com/gieljnssns/kostalpiko-sensor-homeassistant
+- https://github.com/rcasula/kostalpiko-homeassistant
+
+## Features
+
+- **Config Flow Support**: Easy setup through the Home Assistant UI
+- **Multiple Sensor Types**: Monitor various parameters of your inverter
+- **BA Sensor Support**: Track consumption data when BA sensor is installed
+- **Automatic Device Registration**: Creates a device entity with all sensors grouped together
+- **String Monitoring**: Support for up to 3 PV strings
+- **Three-Phase Monitoring**: Individual monitoring of L1, L2, and L3 phases
+
+## Compatibility
+
+This integration works with Kostal Piko inverters that have a web interface accessible at:
 ```
 http://pvserver:<YOUR_PASSWORD>@<YOUR_INVERTER_IP>/index.fhtml
 ```
-Otherwise it will not work
 
-![Alt text](https://github.com/gieljnssns/kostalpiko-sensor-homeassistant/blob/master/img/Schermafbeelding%202020-03-30%20om%2011.25.18.png?raw=true "Optional Title")
+Your inverter's web interface should look similar to this:
 
-```
+![Kostal Piko Web Interface](https://github.com/gieljnssns/kostalpiko-sensor-homeassistant/blob/master/img/Schermafbeelding%202020-03-30%20om%2011.25.18.png?raw=true)
+
+If your web interface looks different, this integration may not work with your inverter model.
+
+## Installation
+
+### HACS (Recommended)
+
+1. Open HACS in Home Assistant
+2. Go to "Integrations"
+3. Click the three dots in the top right corner
+4. Select "Custom repositories"
+5. Add this repository URL and select "Integration" as the category
+6. Click "Install"
+7. Restart Home Assistant
+
+### Manual Installation
+
+1. Copy the `custom_components/kostal` folder to your Home Assistant's `custom_components` directory
+2. Restart Home Assistant
+
+## Configuration
+
+### UI Configuration (Recommended)
+
+1. Go to **Settings** → **Devices & Services**
+2. Click **Add Integration**
+3. Search for **Kostal Piko**
+4. Enter your inverter details:
+   - **Name**: A friendly name for your inverter (default: "Kostal Piko")
+   - **Host**: The IP address of your inverter (format: `http://192.168.x.x`)
+   - **Username**: Usually `pvserver`
+   - **Password**: Your inverter's web interface password
+   - **Monitored Conditions**: Select the sensors you want to track
+
+### YAML Configuration (Legacy)
+
+You can still configure the integration via `configuration.yaml`:
+
+```yaml
 sensor:
   - platform: kostal
-    host: !secret kostal_host  # "http://192.168.xx.xx"
-    username: !secret kostal_username
+    host: !secret kostal_host  # "http://192.168.x.x"
+    username: !secret kostal_username  # Usually "pvserver"
     password: !secret kostal_password
     monitored_conditions:
-      - solar_generator_power  # only available when using a BA sensor
-      - consumption_phase_1    # only available when using a BA sensor
-      - consumption_phase_2    # only available when using a BA sensor
-      - consumption_phase_3    # only available when using a BA sensor
+      - solar_generator_power  # Only available with BA sensor
+      - consumption_phase_1    # Only available with BA sensor
+      - consumption_phase_2    # Only available with BA sensor
+      - consumption_phase_3    # Only available with BA sensor
       - current_power
       - total_energy
       - daily_energy
@@ -30,6 +87,8 @@ sensor:
       - string1_current
       - string2_voltage
       - string2_current
+      - string3_voltage        # If you have 3 strings
+      - string3_current        # If you have 3 strings
       - l1_voltage
       - l1_power
       - l2_voltage
@@ -38,3 +97,62 @@ sensor:
       - l3_power
       - status
 ```
+
+## Available Sensors
+
+### Basic Sensors
+- **Current power** - Current power output (W)
+- **Total energy** - Total energy produced (kWh)
+- **Daily energy** - Energy produced today (kWh)
+- **Status** - Inverter status
+
+### String Sensors (PV Panels)
+- **String 1/2/3 voltage** - DC voltage from each string (V)
+- **String 1/2/3 current** - DC current from each string (A)
+
+### Phase Sensors (AC Output)
+- **L1/L2/L3 voltage** - AC voltage per phase (V)
+- **L1/L2/L3 power** - AC power output per phase (W)
+
+### BA Sensor Readings (Optional)
+These sensors require a BA (Battery/consumption Analysis) sensor to be installed on your inverter:
+- **Solar generator power** - Total power from solar panels (W)
+- **Consumption phase 1/2/3** - Power consumption per phase (W)
+
+## Update Frequency
+
+The integration updates sensor values every 30 seconds to avoid overloading the inverter's web interface.
+
+## Troubleshooting
+
+### Cannot Connect
+- Verify your inverter is accessible at `http://<YOUR_IP>/index.fhtml`
+- Check that your username and password are correct
+- Ensure your inverter's web interface is enabled
+
+### BA Sensor Shows "No BA sensor installed"
+This is normal if you don't have a BA sensor. Either don't monitor these sensors or ignore the message.
+
+### Sensors Not Updating
+- Check Home Assistant logs for errors
+- Verify network connectivity to the inverter
+- Ensure the inverter is online and producing power
+
+## Requirements
+
+- Home Assistant 2021.12 or newer
+- Python package `kostalpiko>=0.6` (automatically installed)
+
+## Version
+
+Current version: **1.2.0**
+
+## Credits
+
+This integration is based on the excellent work from:
+- [@gieljnssns](https://github.com/gieljnssns) - [kostalpiko-sensor-homeassistant](https://github.com/gieljnssns/kostalpiko-sensor-homeassistant)
+- [@rcasula](https://github.com/rcasula) - [kostalpiko-homeassistant](https://github.com/rcasula/kostalpiko-homeassistant)
+
+## License
+
+See [LICENSE](LICENSE) file for details.
