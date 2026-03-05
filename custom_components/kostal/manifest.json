@@ -1,13 +1,13 @@
 {
   "domain": "kostal",
-  "name": "Kostal Piko",
+  "name": "Kostal Piko (Legacy)",
   "version": "1.2.0",
   "config_flow": true,
-  "documentation": "https://github.com/gieljnssns/kostalpiko-sensor-homeassistant",
+  "documentation": "https://github.com/feutl/ha-kostal-piko-legacy",
+  "issue_tracker": "https://github.com/feutl/ha-kostal-piko-legacy/issues",
   "requirements": ["kostalpiko>=0.6"],
-  "ssdp": [],
-  "zeroconf": [],
-  "homekit": {},
   "dependencies": [],
-  "codeowners": ["@gieljnssns"]
+  "codeowners": ["@feutl"],
+  "iot_class": "local_polling",
+  "integration_type": "device"
 }
