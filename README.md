@@ -153,6 +153,12 @@ This integration is based on the excellent work from:
 - [@gieljnssns](https://github.com/gieljnssns) - [kostalpiko-sensor-homeassistant](https://github.com/gieljnssns/kostalpiko-sensor-homeassistant)
 - [@rcasula](https://github.com/rcasula) - [kostalpiko-homeassistant](https://github.com/rcasula/kostalpiko-homeassistant)
 
+## Development & Maintenance
+
+**Important Note:** The initial code for this integration was provided by the repositories mentioned above. All subsequent changes and updates to this codebase have been performed using vibe-coding techniques or with the assistance of AI agents. 
+
+This approach was chosen as the maintainer is not a coder. Users should be aware of this development methodology and are encouraged to report any issues or contribute improvements through the issue tracker.
+
 ## License
 
 See [LICENSE](LICENSE) file for details.
