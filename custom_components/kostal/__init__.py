@@ -1,5 +1,6 @@
 """The Kostal PIKO inverter sensor integration."""
 
+import asyncio
 import logging
 import voluptuous as vol
 
@@ -22,7 +23,7 @@ from .const import DEFAULT_NAME, DOMAIN, SENSOR_TYPES
 
 _LOGGER = logging.getLogger(__name__)
 
-__version__ = "1.3.1-rc.2"
+__version__ = "1.3.1-rc.3"
 VERSION = __version__
 
 CONFIG_SCHEMA = vol.Schema(
@@ -109,7 +110,7 @@ class KostalInstance:
 
         hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, self.stop)
 
-        hass.loop.create_task(self.start_up())
+        asyncio.create_task(self.start_up())
 
     async def start_up(self):
         """Start up the Kostal instance."""
@@ -122,7 +123,7 @@ class KostalInstance:
 
     def add_sensors(self, sensors, piko: PikoHolder):
         """Add sensors."""
-        self.hass.add_job(self._asyncadd_sensors(sensors, piko))
+        self.hass.async_create_task(self._asyncadd_sensors(sensors, piko))
 
     async def _asyncadd_sensors(self, sensors, piko: PikoHolder):
         """Add sensors asynchronously."""

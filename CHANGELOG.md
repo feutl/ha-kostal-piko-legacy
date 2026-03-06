@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1-rc.3] - 2026-03-06
+
+### Changed
+- Replaced deprecated `hass.loop.create_task()` with `asyncio.create_task()`
+- Replaced deprecated `hass.add_job()` with `hass.async_create_task()`
+- Removed deprecated `@Throttle` decorator from sensor updates (throttling still handled by piko_holder)
+- Removed unused imports: `time`, `Throttle`, and `MIN_TIME_BETWEEN_UPDATES`
+
+### Improved
+- Updated to current Home Assistant best practices
+- Cleaner code following modern async patterns
+
 ## [1.3.1-rc.1] - 2026-03-06
 
 ### Added

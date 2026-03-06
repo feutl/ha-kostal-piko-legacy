@@ -1,7 +1,6 @@
 """Support for Kostal PIKO Photvoltaic (PV) inverter."""
 
 import logging
-import time
 
 from .piko_holder import PikoHolder
 
@@ -9,7 +8,6 @@ from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 
-from homeassistant.util import Throttle
 from homeassistant.const import (
     CONF_USERNAME,
     CONF_PASSWORD,
@@ -27,7 +25,7 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 
-from .const import SENSOR_TYPES, MIN_TIME_BETWEEN_UPDATES, DOMAIN
+from .const import SENSOR_TYPES, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -121,7 +119,6 @@ class PikoSensor(SensorEntity):
             "model": self.model,
         }
 
-    @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def async_update(self):
         """Update the sensor."""
         await self.hass.async_add_executor_job(self._update)
