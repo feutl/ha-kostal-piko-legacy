@@ -157,7 +157,7 @@ The library is automatically installed by Home Assistant when the integration is
 
 ## Version
 
-Current version: **1.3.1-rc.2**
+Current version: **1.3.1-rc.3**
 
 ## Credits
 
@@ -170,6 +170,10 @@ This integration is based on the excellent work from:
 **Important Note:** The initial code for this integration was provided by the repositories mentioned above. All subsequent changes and updates to this codebase have been performed using vibe-coding techniques or with the assistance of AI agents. 
 
 This approach was chosen as the maintainer is not a coder. Users should be aware of this development methodology and are encouraged to report any issues or contribute improvements through the issue tracker.
+
+### For Maintainers
+
+If you're creating a new release, please follow the workflow documented in [RELEASE.md](RELEASE.md) to ensure proper versioning, tagging, and GitHub release creation.
 
 ## License
 
