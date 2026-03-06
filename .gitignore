@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.build/
+.dist/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+.env/
+
+# Test and coverage
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+
+# Logs
+*.log
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db

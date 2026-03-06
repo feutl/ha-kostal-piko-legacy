@@ -346,9 +346,10 @@ def _update(self):
 
 ---
 
-## Priority 7: Simplify to English-Only (COMPLETED)
+## Priority 7: Simplify to English-Only (COMPLETED + TESTED)
 
 **Decision:** Remove all translation files and use English only in strings.json
+**Status:** Completed and tested on 2026-03-06
 
 ### 7.1 Update strings.json with English text
 **File:** `custom_components/kostal/strings.json`  
