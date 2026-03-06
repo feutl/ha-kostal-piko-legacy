@@ -23,7 +23,7 @@ from .const import DEFAULT_NAME, DOMAIN, SENSOR_TYPES
 
 _LOGGER = logging.getLogger(__name__)
 
-__version__ = "1.3.1-rc.4"
+__version__ = "1.3.1-rc.5"
 VERSION = __version__
 
 CONFIG_SCHEMA = vol.Schema(
