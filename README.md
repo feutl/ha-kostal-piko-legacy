@@ -157,7 +157,7 @@ The library is automatically installed by Home Assistant when the integration is
 
 ## Version
 
-Current version: **1.3.1-rc.3**
+Current version: **1.3.1-rc.4**
 
 ## Credits
 

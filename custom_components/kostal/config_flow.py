@@ -131,3 +131,38 @@ class KostalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if self._host_in_configuration_exists(user_input[CONF_HOST]):
             return self.async_abort(reason="host_exists")
         return await self.async_step_user(user_input)
+
+    @staticmethod
+    def async_get_options_flow(config_entry):
+        """Return the options flow handler for this config entry."""
+        return KostalOptionsFlowHandler(config_entry)
+
+
+class KostalOptionsFlowHandler(config_entries.OptionsFlow):
+    """Handle Kostal options flow."""
+
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        """Initialize Kostal options flow."""
+        self.config_entry = config_entry
+
+    async def async_step_init(self, user_input=None):
+        """Manage the options."""
+        if user_input is not None:
+            return self.async_create_entry(title="", data=user_input)
+
+        current_conditions = self.config_entry.options.get(
+            CONF_MONITORED_CONDITIONS,
+            self.config_entry.data.get(
+                CONF_MONITORED_CONDITIONS, DEFAULT_MONITORED_CONDITIONS
+            ),
+        )
+
+        options_schema = vol.Schema(
+            {
+                vol.Required(
+                    CONF_MONITORED_CONDITIONS, default=current_conditions
+                ): cv.multi_select(SUPPORTED_SENSOR_TYPES),
+            }
+        )
+
+        return self.async_show_form(step_id="init", data_schema=options_schema)
