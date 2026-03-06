@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Bumped integration version to 1.3.1-rc.1 for this pre-release
 
+### Testing
+- Verified release installation works as expected (2026-03-06)
+
 ## [1.3.0] - 2026-03-05
 
 ### Changed

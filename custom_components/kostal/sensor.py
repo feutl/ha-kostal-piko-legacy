@@ -9,7 +9,6 @@ from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 
-from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 from homeassistant.const import (
     CONF_USERNAME,

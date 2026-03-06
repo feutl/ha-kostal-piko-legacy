@@ -7,7 +7,7 @@ from kostalpiko.kostalpiko import Piko
 
 from requests.exceptions import HTTPError, ConnectTimeout
 
-from homeassistant import config_entries, exceptions
+from homeassistant import config_entries
 import homeassistant.helpers.config_validation as cv
 
 from homeassistant.const import (
@@ -131,11 +131,3 @@ class KostalConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if self._host_in_configuration_exists(user_input[CONF_HOST]):
             return self.async_abort(reason="host_exists")
         return await self.async_step_user(user_input)
-
-
-class CannotConnect(exceptions.HomeAssistantError):
-    """Error to indicate we cannot connect."""
-
-
-class InvalidAuth(exceptions.HomeAssistantError):
-    """Error to indicate there is invalid auth."""

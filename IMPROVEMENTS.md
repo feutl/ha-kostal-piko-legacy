@@ -141,8 +141,9 @@ def _check_host(self, host, username, password) -> bool:
 
 ### 3.1 Remove Unused Exception Classes
 **File:** `custom_components/kostal/config_flow.py`  
-**Lines:** ~145-150  
-**Action:** Delete these classes as they're never used:
+**Lines:** ~145-150 (REMOVED)
+**Status:** Completed and tested on 2026-03-06
+**Action:** Deleted classes as they were never used:
 ```python
 class CannotConnect(exceptions.HomeAssistantError):
     """Error to indicate we cannot connect."""
@@ -150,7 +151,7 @@ class CannotConnect(exceptions.HomeAssistantError):
 class InvalidAuth(exceptions.HomeAssistantError):
     """Error to indicate there is invalid auth."""
 ```
-**Testing:** Verify config flow still works normally.
+**Testing:** Config flow still works normally.
 
 ---
 
@@ -162,6 +163,7 @@ class InvalidAuth(exceptions.HomeAssistantError):
 from homeassistant.helpers.entity import Entity
 ```
 **Action:** Delete this import line.  
+**Status:** Completed and tested on 2026-03-06  
 **Testing:** Verify no errors when reloading integration.
 
 ---
