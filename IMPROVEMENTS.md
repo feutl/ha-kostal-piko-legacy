@@ -180,6 +180,7 @@ async def clean(self):
         self.config_entry, ["sensor"]
     )
 ```
+**Status:** Completed (cleanup implemented) on 2026-03-06
 **Testing:** Add/remove integration and verify no resource leaks or errors.
 
 ---

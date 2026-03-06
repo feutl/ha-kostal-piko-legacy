@@ -22,7 +22,7 @@ from .const import DEFAULT_NAME, DOMAIN, SENSOR_TYPES
 
 _LOGGER = logging.getLogger(__name__)
 
-__version__ = "1.3.1-rc.1"
+__version__ = "1.3.1-rc.2"
 VERSION = __version__
 
 CONFIG_SCHEMA = vol.Schema(
@@ -133,4 +133,6 @@ class KostalInstance:
 
     async def clean(self):
         """Clean up."""
-        pass
+        await self.hass.config_entries.async_unload_platforms(
+            self.config_entry, ["sensor"]
+        )
