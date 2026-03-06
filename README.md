@@ -143,9 +143,21 @@ This is normal if you don't have a BA sensor. Either don't monitor these sensors
 - Home Assistant 2021.12 or newer
 - Python package `kostalpiko>=0.6` (automatically installed)
 
+## Dependencies
+
+This integration depends on the [kostalpiko](https://github.com/rcasula/kostalpiko) Python library for communicating with Kostal Piko inverters.
+
+**Library Information:**
+- **Package**: `kostalpiko` (available on [PyPI](https://pypi.org/project/kostalpiko/))
+- **Source**: https://github.com/rcasula/kostalpiko
+- **Maintainer**: [@rcasula](https://github.com/rcasula)
+- **Functionality**: Handles HTTP communication and HTML parsing of the inverter's web interface
+
+The library is automatically installed by Home Assistant when the integration is set up.
+
 ## Version
 
-Current version: **1.2.0**
+Current version: **1.3.1-rc.2**
 
 ## Credits
 
