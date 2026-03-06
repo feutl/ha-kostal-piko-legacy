@@ -143,16 +143,16 @@ class KostalOptionsFlowHandler(config_entries.OptionsFlow):
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize Kostal options flow."""
-        super().__init__(config_entry)
+        self._config_entry = config_entry
 
     async def async_step_init(self, user_input=None):
         """Manage the options."""
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
-        current_conditions = self.config_entry.options.get(
+        current_conditions = self._config_entry.options.get(
             CONF_MONITORED_CONDITIONS,
-            self.config_entry.data.get(
+            self._config_entry.data.get(
                 CONF_MONITORED_CONDITIONS, DEFAULT_MONITORED_CONDITIONS
             ),
         )
