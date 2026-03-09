@@ -197,6 +197,7 @@ All sensors are grouped under a single device:
 2. **No diagnostics:** No device diagnostics integration yet
 3. **Limited error handling:** Network errors could be handled more gracefully
 4. **No retry logic:** Failed updates don't automatically retry
+5. **Fixed update interval:** Update interval is hard-coded at 30 seconds (not user-configurable)
 
 ## External Dependencies
 
@@ -226,7 +227,7 @@ See IMPROVEMENTS.md for detailed roadmap. Priority areas:
 1. Implement DataUpdateCoordinator pattern
 2. Add comprehensive error handling
 3. Add device diagnostics support
-4. Consider adding configuration for update interval
+4. Make update interval user-configurable (currently fixed at 30 seconds)
 
 ## Notes for AI Assistants
 

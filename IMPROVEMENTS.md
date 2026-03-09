@@ -113,6 +113,38 @@ def _update(self):
 
 ---
 
+### 2.4 Make Update Interval Configurable
+**Priority:** Medium  
+**Benefit:** Allow users to customize polling frequency based on their needs and inverter capabilities  
+**Current:** Hard-coded 30-second update interval in `const.py`  
+**Files:** `custom_components/kostal/const.py`, `config_flow.py`, `piko_holder.py`  
+**Action:** 
+- Add update interval to config flow (both initial setup and options flow)
+- Add configuration option with default of 30 seconds
+- Allow range of 10-300 seconds (configurable via UI)
+- Update `piko_holder.py` to use configured interval instead of constant
+
+**Implementation:**
+```python
+# In const.py
+DEFAULT_SCAN_INTERVAL = 30
+MIN_SCAN_INTERVAL = 10
+MAX_SCAN_INTERVAL = 300
+
+# In config_flow.py - add to schema
+vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): vol.All(
+    vol.Coerce(int), vol.Range(min=MIN_SCAN_INTERVAL, max=MAX_SCAN_INTERVAL)
+)
+```
+
+**Testing:** 
+- Verify default 30-second interval works
+- Test with different intervals (10s, 60s, 120s)
+- Confirm options flow allows updating interval
+- Verify inverter isn't overloaded with frequent requests
+
+---
+
 ## Testing Checklist for v1.3.1
 
 - ✅ Integration loads successfully
