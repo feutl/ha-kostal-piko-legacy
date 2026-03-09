@@ -157,7 +157,17 @@ The library is automatically installed by Home Assistant when the integration is
 
 ## Version
 
-Current version: **1.3.1-rc.6**
+Current version: **1.3.1**
+
+See [CHANGELOG.md](CHANGELOG.md) for version history and changes.
+
+## What's New in 1.3.1
+
+- ✅ Modernized for Home Assistant 2026.3.0
+- ✅ All deprecated code removed
+- ✅ Options flow support - update sensors after setup
+- ✅ Improved async patterns
+- ✅ Better maintainability
 
 ## Credits
 

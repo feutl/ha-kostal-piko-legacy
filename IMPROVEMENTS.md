@@ -4,73 +4,68 @@ This document outlines planned improvements for the Kostal Piko Legacy integrati
 
 ---
 
-## Priority 1: Remove Deprecated Code
+## ✅ Completed in v1.3.1
 
-### 1.1 Remove CONNECTION_CLASS in config_flow.py
+### ✅ Remove Deprecated Code
+
+#### 1.1 Remove CONNECTION_CLASS in config_flow.py ✅
+**Status:** COMPLETED in v1.3.1-rc.4  
 **File:** `custom_components/kostal/config_flow.py`  
-**Line:** ~49  
-**Current:**
-```python
-CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_POLL
-```
-**Action:** Delete this line entirely. It's deprecated and no longer used by Home Assistant.  
-**Testing:** Verify config flow still works when adding the integration through UI.
+**Action:** Removed deprecated `CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_POLL`  
+**Testing:** ✅ Config flow verified working in HA 2026.3.0
 
 ---
 
-### 1.2 Replace hass.loop.create_task() in __init__.py
+#### 1.2 Replace hass.loop.create_task() in __init__.py ✅
+**Status:** COMPLETED in v1.3.1-rc.3  
 **File:** `custom_components/kostal/__init__.py`  
-**Line:** ~112  
-**Current:**
+**Changed from:**
 ```python
 hass.loop.create_task(self.start_up())
 ```
-**Change to:**
+**Changed to:**
 ```python
-import asyncio
-...
 asyncio.create_task(self.start_up())
 ```
-**Why:** `hass.loop` is deprecated. Use standard asyncio instead.  
-**Testing:** Restart HA and verify integration loads correctly. Check logs for errors.
+**Testing:** ✅ Integration loads correctly
 
 ---
 
-### 1.3 Replace hass.add_job() in __init__.py
+#### 1.3 Replace hass.add_job() in __init__.py ✅
+**Status:** COMPLETED in v1.3.1-rc.3  
 **File:** `custom_components/kostal/__init__.py`  
-**Line:** ~125  
-**Current:**
+**Changed from:**
 ```python
 self.hass.add_job(self._asyncadd_sensors(sensors, piko))
 ```
-**Change to:**
+**Changed to:**
 ```python
 self.hass.async_create_task(self._asyncadd_sensors(sensors, piko))
 ```
-**Why:** `hass.add_job()` is deprecated.  
-**Testing:** Verify all sensors are created and appear in HA after integration setup.
+**Testing:** ✅ All sensors created successfully
 
 ---
 
-### 1.4 Remove @Throttle Decorator
+#### 1.4 Remove @Throttle Decorator ✅
+**Status:** COMPLETED in v1.3.1-rc.3  
 **File:** `custom_components/kostal/sensor.py`  
-**Line:** ~126  
-**Current:**
-```python
-from homeassistant.util import Throttle
-...
-@Throttle(MIN_TIME_BETWEEN_UPDATES)
-async def async_update(self):
-```
-**Action:** Remove the decorator but keep throttling logic in `piko_holder.py` for now. Long-term: implement DataUpdateCoordinator (see Priority 2).  
-**Note:** The throttling is already handled in `piko_holder.py`, so removing this decorator shouldn't break functionality.  
-**Testing:** Verify sensors still update every 30 seconds, not more frequently.
+**Action:** Removed deprecated `@Throttle` decorator  
+**Note:** Throttling still handled by `piko_holder.py`  
+**Testing:** ✅ Sensors update correctly every 30 seconds
 
 ---
 
-## Priority 2: Add Proper Error Handling
+#### 1.5 Options Flow Implementation ✅
+**Status:** COMPLETED in v1.3.1-rc.4 through rc.6  
+**File:** `custom_components/kostal/config_flow.py`  
+**Action:** Added `KostalOptionsFlowHandler` to allow updating monitored sensors after initial setup  
+**Testing:** ✅ Options flow working in HA 2026.3.0
 
-### 2.1 Add Exception Handling in sensor.py
+---
+
+## Priority 2: Future Enhancements
+
+### 2.1 Add Proper Error Handling
 **File:** `custom_components/kostal/sensor.py`  
 **Function:** `_update()` (line ~131)  
 **Action:** Wrap data fetching in try-except block:
@@ -97,6 +92,46 @@ def _update(self):
 - Unplug network cable or turn off inverter
 - Verify sensors show as "unavailable" in HA
 - Reconnect and verify sensors come back online
+
+---
+
+### 2.2 Implement DataUpdateCoordinator
+**Priority:** Medium  
+**Benefit:** Better error handling, automatic retry logic, and more efficient updates  
+**Files:** `custom_components/kostal/__init__.py`, `sensor.py`  
+**Action:** Migrate from manual throttling to Home Assistant's `DataUpdateCoordinator` pattern  
+**Testing:** Comprehensive testing of all sensor updates and error scenarios
+
+---
+
+### 2.3 Add Device Diagnostics
+**Priority:** Low  
+**Benefit:** Better debugging capabilities for users and developers  
+**File:** `custom_components/kostal/diagnostics.py` (new)  
+**Action:** Implement diagnostics integration to export configuration and sensor data  
+**Testing:** Download diagnostics from device page in HA
+
+---
+
+## Testing Checklist for v1.3.1
+
+- ✅ Integration loads successfully
+- ✅ Config flow works for new installations  
+- ✅ Options flow allows updating sensors
+- ✅ All sensors update correctly
+- ✅ No deprecation warnings in logs
+- ✅ Compatible with HA 2026.3.0
+- ✅ Device appears correctly in Devices & Services
+- ✅ All sensor entities grouped under device
+
+---
+
+## Version History
+
+- **v1.3.1** (2026-03-09): Stable release with all deprecation fixes
+- **v1.3.1-rc.1 to rc.6** (2026-03-06): Release candidates with incremental fixes
+- **v1.3.0** (2026-03-05): English-only simplification
+- **v1.2.0** (2026-03-05): Initial baseline release
 
 ---
 

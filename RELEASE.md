@@ -99,6 +99,79 @@ gh release create v1.3.1 --title "v1.3.1 - Description" --notes "..."
 4. `git tag vX.X.X` → `git push origin vX.X.X`
 5. `gh release create`
 
+## Example: Releasing v1.3.1
+
+Here's a concrete example of releasing version 1.3.1:
+
+```bash
+# 1. Update version in manifest.json and __init__.py (already done)
+
+# 2. Stage and commit changes
+git add custom_components/kostal/manifest.json custom_components/kostal/__init__.py CHANGELOG.md
+git commit -m "Release v1.3.1 - Modernization and deprecation fixes
+
+- Removed all deprecated code
+- Updated to HA 2026 best practices
+- Added options flow support
+- Improved async patterns"
+
+# 3. Push to GitHub
+git push origin master
+
+# 4. Create and push tag
+git tag v1.3.1
+git push origin v1.3.1
+
+# 5. Create GitHub release
+gh release create v1.3.1 \
+  --title "v1.3.1 - Modernization Release" \
+  --notes "## What's New
+
+✅ Fully compatible with Home Assistant 2026.3.0
+✅ All deprecated code removed
+✅ Options flow - update sensors after setup
+✅ Modern async patterns
+✅ Better code maintainability
+
+## Changes
+- Removed deprecated \`@Throttle\`, \`hass.loop\`, \`hass.add_job\`, and \`CONNECTION_CLASS\`
+- Implemented options flow for updating monitored sensors
+- Updated to current HA development best practices
+
+## Testing
+Verified with Home Assistant 2026.3.0 - all features working correctly.
+
+See [CHANGELOG.md](https://github.com/feutl/ha-kostal-piko-legacy/blob/master/CHANGELOG.md) for complete details."
+```
+
+## Post-Release Checklist
+
+After creating a release:
+- ✅ Verify the tag appears on GitHub
+- ✅ Verify the release appears on the Releases page
+- ✅ Check HACS can discover the new version (may take a few hours)
+- ✅ Test installation of the new version in a test HA instance
+- ✅ Monitor issue tracker for any problems
+
+## Helpful Git Commands
+
+```bash
+# View all tags
+git tag
+
+# Delete a local tag (if you made a mistake)
+git tag -d vX.X.X
+
+# Delete a remote tag (use with caution!)
+git push origin --delete vX.X.X
+
+# View commit history
+git log --oneline
+
+# Check current branch and status
+git status
+```
+
 **If you mess up:**
 ```bash
 # Delete local tag
