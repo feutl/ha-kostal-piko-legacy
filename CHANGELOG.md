@@ -29,6 +29,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All sensors working correctly
 - Config flow and options flow tested successfully
 
+### Documentation
+- Updated README.md with version 1.3.1 and "What's New" section
+- Reorganized IMPROVEMENTS.md to show completed work and future roadmap
+- Enhanced RELEASE.md with concrete examples and command references
+- Created comprehensive .github/copilot-instructions.md for AI assistant guidance
+- All documentation meets quality standards (clear language, accurate versioning, proper formatting)
+
 ## [1.3.1-rc.6] - 2026-03-06
 
 ### Fixed

@@ -21,6 +21,24 @@ This custom component integrates Kostal Piko inverters with Home Assistant, prov
 - **String Monitoring**: Support for up to 3 PV strings
 - **Three-Phase Monitoring**: Individual monitoring of L1, L2, and L3 phases
 
+## Version
+
+Current version: **1.3.1**
+
+See [CHANGELOG.md](CHANGELOG.md) for version history and changes.
+
+**What's New in 1.3.1:**
+- ✅ Modernized for Home Assistant 2026.3.0
+- ✅ All deprecated code removed
+- ✅ Options flow support - update sensors after setup
+- ✅ Improved async patterns
+- ✅ Better maintainability
+
+## Requirements
+
+- Home Assistant 2021.12 or newer
+- Python package `kostalpiko>=0.6` (automatically installed)
+
 ## Compatibility
 
 This integration works with Kostal Piko inverters that have a web interface accessible at:
@@ -46,11 +64,6 @@ If your web interface looks different, this integration may not work with your i
 6. Click "Install"
 7. Restart Home Assistant
 
-### Manual Installation
-
-1. Copy the `custom_components/kostal` folder to your Home Assistant's `custom_components` directory
-2. Restart Home Assistant
-
 ## Configuration
 
 ### UI Configuration (Recommended)
@@ -64,39 +77,6 @@ If your web interface looks different, this integration may not work with your i
    - **Username**: Usually `pvserver`
    - **Password**: Your inverter's web interface password
    - **Monitored Conditions**: Select the sensors you want to track
-
-### YAML Configuration (Legacy)
-
-You can still configure the integration via `configuration.yaml`:
-
-```yaml
-sensor:
-  - platform: kostal
-    host: !secret kostal_host  # "http://192.168.x.x"
-    username: !secret kostal_username  # Usually "pvserver"
-    password: !secret kostal_password
-    monitored_conditions:
-      - solar_generator_power  # Only available with BA sensor
-      - consumption_phase_1    # Only available with BA sensor
-      - consumption_phase_2    # Only available with BA sensor
-      - consumption_phase_3    # Only available with BA sensor
-      - current_power
-      - total_energy
-      - daily_energy
-      - string1_voltage
-      - string1_current
-      - string2_voltage
-      - string2_current
-      - string3_voltage        # If you have 3 strings
-      - string3_current        # If you have 3 strings
-      - l1_voltage
-      - l1_power
-      - l2_voltage
-      - l2_power
-      - l3_voltage
-      - l3_power
-      - status
-```
 
 ## Available Sensors
 
@@ -138,11 +118,6 @@ This is normal if you don't have a BA sensor. Either don't monitor these sensors
 - Verify network connectivity to the inverter
 - Ensure the inverter is online and producing power
 
-## Requirements
-
-- Home Assistant 2021.12 or newer
-- Python package `kostalpiko>=0.6` (automatically installed)
-
 ## Dependencies
 
 This integration depends on the [kostalpiko](https://github.com/rcasula/kostalpiko) Python library for communicating with Kostal Piko inverters.
@@ -154,20 +129,6 @@ This integration depends on the [kostalpiko](https://github.com/rcasula/kostalpi
 - **Functionality**: Handles HTTP communication and HTML parsing of the inverter's web interface
 
 The library is automatically installed by Home Assistant when the integration is set up.
-
-## Version
-
-Current version: **1.3.1**
-
-See [CHANGELOG.md](CHANGELOG.md) for version history and changes.
-
-## What's New in 1.3.1
-
-- ✅ Modernized for Home Assistant 2026.3.0
-- ✅ All deprecated code removed
-- ✅ Options flow support - update sensors after setup
-- ✅ Improved async patterns
-- ✅ Better maintainability
 
 ## Credits
 
