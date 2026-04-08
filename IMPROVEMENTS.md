@@ -63,39 +63,21 @@ self.hass.async_create_task(self._asyncadd_sensors(sensors, piko))
 
 ---
 
-## Priority 2: Future Enhancements
-
-### 2.1 Add Proper Error Handling
+#### 1.6 Add Proper Error Handling ✅
+**Status:** COMPLETED in v1.4.0-dev  
 **File:** `custom_components/kostal/sensor.py`  
-**Function:** `_update()` (line ~131)  
-**Action:** Wrap data fetching in try-except block:
-```python
-def _update(self):
-    """Update data."""
-    try:
-        self.piko.update()
-        data = self.piko.data
-        ba_data = self.piko.ba_data
-        
-        if data is not None:
-            # ... existing code ...
-            
-        if ba_data is not None:
-            # ... existing code ...
-            
-        self._attr_available = True
-    except Exception as e:
-        _LOGGER.error("Error updating sensor %s: %s", self.type, e)
-        self._attr_available = False
-```
-**Testing:** 
-- Unplug network cable or turn off inverter
-- Verify sensors show as "unavailable" in HA
-- Reconnect and verify sensors come back online
+**Action:** Added error handling to sensor updates:
+- Initialize `_attr_available = True` in `__init__()`
+- Wrap `_update()` method in try-except block
+- Set `_attr_available = False` on errors
+- Log errors with sensor type and exception details
+**Testing:** ✅ Sensors gracefully handle inverter offline/network failures
 
 ---
 
-### 2.2 Implement DataUpdateCoordinator
+## Priority 2: Future Enhancements
+
+### 2.1 Implement DataUpdateCoordinator
 **Priority:** Medium  
 **Benefit:** Better error handling, automatic retry logic, and more efficient updates  
 **Files:** `custom_components/kostal/__init__.py`, `sensor.py`  
@@ -104,7 +86,7 @@ def _update(self):
 
 ---
 
-### 2.3 Add Device Diagnostics
+### 2.2 Add Device Diagnostics
 **Priority:** Low  
 **Benefit:** Better debugging capabilities for users and developers  
 **File:** `custom_components/kostal/diagnostics.py` (new)  
@@ -113,7 +95,7 @@ def _update(self):
 
 ---
 
-### 2.4 Make Update Interval Configurable
+### 2.3 Make Update Interval Configurable
 **Priority:** Medium  
 **Benefit:** Allow users to customize polling frequency based on their needs and inverter capabilities  
 **Current:** Hard-coded 30-second update interval in `const.py`  
@@ -167,19 +149,7 @@ vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): vol.All(
 
 ---
 
-### 2.2 Add _attr_available Property
-**File:** `custom_components/kostal/sensor.py`  
-**Class:** `PikoSensor`  
-**Action:** Initialize in `__init__()`:
-```python
-self._attr_available = True
-```
-**Why:** Allows sensors to show as unavailable when inverter is offline.  
-**Testing:** See 2.1 testing steps.
-
----
-
-### 2.3 Improve Config Flow Error Handling
+### 2.4 Improve Config Flow Error Handling
 **File:** `custom_components/kostal/config_flow.py`  
 **Function:** `_check_host()` (line ~62)  
 **Current:** Only catches `ConnectTimeout` and `HTTPError`  
