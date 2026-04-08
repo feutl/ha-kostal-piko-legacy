@@ -25,7 +25,7 @@ from .const import DEFAULT_NAME, DOMAIN, SENSOR_TYPES, MIN_TIME_BETWEEN_UPDATES
 
 _LOGGER = logging.getLogger(__name__)
 
-__version__ = "1.3.1"
+__version__ = "1.4.0-alpha.1"
 VERSION = __version__
 
 CONFIG_SCHEMA = vol.Schema(

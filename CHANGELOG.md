@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0-alpha.1] - 2026-04-08
+
+### Added
+- Implemented DataUpdateCoordinator for modern, efficient data fetching
+- Automatic retry logic for failed inverter communication
+- Better error handling with UpdateFailed exceptions
+
+### Changed
+- **BREAKING**: Major refactoring to use DataUpdateCoordinator pattern
+- PikoSensor now extends CoordinatorEntity for automatic updates
+- Removed manual async_update() and _update() methods from sensors
+- Using raw Piko class from library instead of PikoHolder wrapper
+- State property now computes directly from coordinator data
+- More efficient updates - coordinator prevents duplicate fetches
+
+### Improved
+- Added comprehensive error handling to sensor updates
+- Sensors now properly show "unavailable" when inverter is offline
+- Better logging of errors with sensor type and exception details
+- Simplified sensor code following modern HA patterns
+- Automatic update scheduling via coordinator (30-second intervals)
+
+### Notes
+- This is an ALPHA release for testing purposes
+- piko_holder.py is now unused but kept for reference
+- Requires testing with real Kostal Piko inverter
+- Please report any issues on GitHub
+
 ## [1.3.1] - 2026-03-09
 
 ### Fixed
