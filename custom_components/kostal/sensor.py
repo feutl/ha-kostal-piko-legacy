@@ -66,6 +66,7 @@ class PikoSensor(SensorEntity):
         self._icon = SENSOR_TYPES[self.type][2]
         self.serial_number = info[0] if info else None
         self.model = info[1] if info else None
+        self._attr_available = True
 
         if self._unit_of_measurement == UnitOfEnergy.KILO_WATT_HOUR:
             self._attr_device_class = SensorDeviceClass.ENERGY
@@ -125,52 +126,58 @@ class PikoSensor(SensorEntity):
 
     def _update(self):
         """Update data."""
-        self.piko.update()
-        data = self.piko.data
-        ba_data = self.piko.ba_data
+        try:
+            self.piko.update()
+            data = self.piko.data
+            ba_data = self.piko.ba_data
 
-        if data is not None:
-            if self.type == "current_power":
-                self._state = data.get_current_power()
-            elif self.type == "total_energy":
-                self._state = data.get_total_energy()
-            elif self.type == "daily_energy":
-                self._state = data.get_daily_energy()
-            elif self.type == "string1_voltage":
-                self._state = data.get_string1_voltage()
-            elif self.type == "string1_current":
-                self._state = data.get_string1_current()
-            elif self.type == "string2_voltage":
-                self._state = data.get_string2_voltage()
-            elif self.type == "string2_current":
-                self._state = data.get_string2_current()
-            elif self.type == "string3_voltage":
-                self._state = data.get_string3_voltage()
-            elif self.type == "string3_current":
-                self._state = data.get_string3_current()
-            elif self.type == "l1_voltage":
-                self._state = data.get_l1_voltage()
-            elif self.type == "l1_power":
-                self._state = data.get_l1_power()
-            elif self.type == "l2_voltage":
-                self._state = data.get_l2_voltage()
-            elif self.type == "l2_power":
-                self._state = data.get_l2_power()
-            elif self.type == "l3_voltage":
-                self._state = data.get_l3_voltage()
-            elif self.type == "l3_power":
-                self._state = data.get_l3_power()
-            elif self.type == "status":
-                self._state = data.get_piko_status()
+            if data is not None:
+                if self.type == "current_power":
+                    self._state = data.get_current_power()
+                elif self.type == "total_energy":
+                    self._state = data.get_total_energy()
+                elif self.type == "daily_energy":
+                    self._state = data.get_daily_energy()
+                elif self.type == "string1_voltage":
+                    self._state = data.get_string1_voltage()
+                elif self.type == "string1_current":
+                    self._state = data.get_string1_current()
+                elif self.type == "string2_voltage":
+                    self._state = data.get_string2_voltage()
+                elif self.type == "string2_current":
+                    self._state = data.get_string2_current()
+                elif self.type == "string3_voltage":
+                    self._state = data.get_string3_voltage()
+                elif self.type == "string3_current":
+                    self._state = data.get_string3_current()
+                elif self.type == "l1_voltage":
+                    self._state = data.get_l1_voltage()
+                elif self.type == "l1_power":
+                    self._state = data.get_l1_power()
+                elif self.type == "l2_voltage":
+                    self._state = data.get_l2_voltage()
+                elif self.type == "l2_power":
+                    self._state = data.get_l2_power()
+                elif self.type == "l3_voltage":
+                    self._state = data.get_l3_voltage()
+                elif self.type == "l3_power":
+                    self._state = data.get_l3_power()
+                elif self.type == "status":
+                    self._state = data.get_piko_status()
 
-        if ba_data is not None:
-            if self.type == "solar_generator_power":
-                self._state = ba_data.get_solar_generator_power() or "No BA sensor installed"
-            elif self.type == "consumption_phase_1":
-                self._state = ba_data.get_consumption_phase_1() or "No BA sensor installed"
-            elif self.type == "consumption_phase_2":
-                self._state = ba_data.get_consumption_phase_2() or "No BA sensor installed"
-            elif self.type == "consumption_phase_3":
-                self._state = ba_data.get_consumption_phase_3() or "No BA sensor installed"
+            if ba_data is not None:
+                if self.type == "solar_generator_power":
+                    self._state = ba_data.get_solar_generator_power() or "No BA sensor installed"
+                elif self.type == "consumption_phase_1":
+                    self._state = ba_data.get_consumption_phase_1() or "No BA sensor installed"
+                elif self.type == "consumption_phase_2":
+                    self._state = ba_data.get_consumption_phase_2() or "No BA sensor installed"
+                elif self.type == "consumption_phase_3":
+                    self._state = ba_data.get_consumption_phase_3() or "No BA sensor installed"
 
-        _LOGGER.debug("END - Type: {} - {}".format(self.type, self._state))
+            self._attr_available = True
+            _LOGGER.debug("END - Type: {} - {}".format(self.type, self._state))
+        
+        except Exception as e:
+            _LOGGER.error("Error updating sensor %s: %s", self.type, e)
+            self._attr_available = False
