@@ -75,18 +75,29 @@ self.hass.async_create_task(self._asyncadd_sensors(sensors, piko))
 
 ---
 
-## Priority 2: Future Enhancements
-
-### 2.1 Implement DataUpdateCoordinator
-**Priority:** Medium  
-**Benefit:** Better error handling, automatic retry logic, and more efficient updates  
+#### 1.7 Implement DataUpdateCoordinator ✅
+**Status:** COMPLETED in v1.4.0-dev  
 **Files:** `custom_components/kostal/__init__.py`, `sensor.py`  
-**Action:** Migrate from manual throttling to Home Assistant's `DataUpdateCoordinator` pattern  
-**Testing:** Comprehensive testing of all sensor updates and error scenarios
+**Action:** Migrated from manual throttling to Home Assistant's `DataUpdateCoordinator` pattern:
+- Created `KostalDataUpdateCoordinator` class for centralized data fetching
+- Coordinator handles 30-second update interval automatically
+- `PikoSensor` now extends `CoordinatorEntity`
+- Removed manual `async_update()` and `_update()` methods
+- State computed from `self.coordinator.data`
+- Automatic error handling with `UpdateFailed` exceptions
+- `piko_holder.py` no longer used (can be removed in future cleanup)
+**Benefits:**
+- Automatic retry logic on communication failures
+- More efficient updates (prevents duplicate fetches)
+- Better error handling and logging
+- Follows modern HA best practices
+**Testing:** ⏳ Requires testing with real inverter
 
 ---
 
-### 2.2 Add Device Diagnostics
+## Priority 2: Future Enhancements
+
+### 2.1 Add Device Diagnostics
 **Priority:** Low  
 **Benefit:** Better debugging capabilities for users and developers  
 **File:** `custom_components/kostal/diagnostics.py` (new)  
@@ -95,7 +106,7 @@ self.hass.async_create_task(self._asyncadd_sensors(sensors, piko))
 
 ---
 
-### 2.3 Make Update Interval Configurable
+### 2.2 Make Update Interval Configurable
 **Priority:** Medium  
 **Benefit:** Allow users to customize polling frequency based on their needs and inverter capabilities  
 **Current:** Hard-coded 30-second update interval in `const.py`  
@@ -149,7 +160,7 @@ vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): vol.All(
 
 ---
 
-### 2.4 Improve Config Flow Error Handling
+### 2.3 Improve Config Flow Error Handling
 **File:** `custom_components/kostal/config_flow.py`  
 **Function:** `_check_host()` (line ~62)  
 **Current:** Only catches `ConnectTimeout` and `HTTPError`  
