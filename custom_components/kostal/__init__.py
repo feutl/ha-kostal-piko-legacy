@@ -24,7 +24,7 @@ from .const import DEFAULT_NAME, DOMAIN, SENSOR_TYPES, MIN_TIME_BETWEEN_UPDATES
 
 _LOGGER = logging.getLogger(__name__)
 
-__version__ = "1.4.0-alpha.3"
+__version__ = "1.4.0"
 VERSION = __version__
 
 CONFIG_SCHEMA = vol.Schema(
@@ -118,39 +118,25 @@ class KostalDataUpdateCoordinator(DataUpdateCoordinator):
         """Fetch data from Kostal Piko inverter."""
         try:
             # Run blocking update in executor
-            _LOGGER.debug("Starting data update for Kostal Piko")
             await self.hass.async_add_executor_job(self.piko.update)
             
             # Check if data attributes exist
             if not hasattr(self.piko, 'data'):
-                _LOGGER.error("Piko object has no 'data' attribute after update")
                 raise UpdateFailed("Piko object has no 'data' attribute")
             
             if self.piko.data is None:
-                _LOGGER.error("Piko data is None after update - inverter may be offline or unreachable")
                 raise UpdateFailed("No data returned from inverter")
             
-            if not hasattr(self.piko, 'ba_data'):
-                _LOGGER.debug("Piko object has no 'ba_data' attribute (BA sensor may not be installed)")
-            
-            # Check if data was fetched successfully
-            _LOGGER.debug("Data update complete. Data: %s, BA Data: %s", 
-                         self.piko.data is not None, 
-                         getattr(self.piko, 'ba_data', None) is not None)
-            
             # Return both data and ba_data
-            result = {
+            return {
                 "data": self.piko.data,
                 "ba_data": getattr(self.piko, 'ba_data', None),
             }
-            _LOGGER.debug("Returning coordinator data with %d keys. Data type: %s", 
-                         len(result), type(self.piko.data).__name__)
-            return result
         except UpdateFailed:
             # Re-raise UpdateFailed as-is
             raise
         except Exception as err:
-            _LOGGER.error("Error communicating with Kostal Piko: %s", err, exc_info=True)
+            _LOGGER.error("Error communicating with Kostal Piko: %s", err)
             raise UpdateFailed(f"Error communicating with Kostal Piko: {err}") from err
 
 
@@ -174,17 +160,9 @@ class KostalInstance:
 
     async def start_up(self):
         """Start up the Kostal instance."""
-        try:
-            # Perform initial data fetch
-            _LOGGER.info("Performing initial data fetch for Kostal Piko")
-            await self.coordinator.async_config_entry_first_refresh()
-            _LOGGER.info("Initial data fetch successful. Last update success: %s", 
-                        self.coordinator.last_update_success)
-            _LOGGER.debug("Coordinator data: %s", self.coordinator.data)
-            self.add_sensors(self.conf[CONF_MONITORED_CONDITIONS])
-        except Exception as err:
-            _LOGGER.error("Failed to start up Kostal integration: %s", err, exc_info=True)
-            raise
+        # Perform initial data fetch
+        await self.coordinator.async_config_entry_first_refresh()
+        self.add_sensors(self.conf[CONF_MONITORED_CONDITIONS])
 
     async def stop(self, _=None):
         """Stop Kostal."""
