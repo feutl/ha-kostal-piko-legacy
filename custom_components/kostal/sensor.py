@@ -82,11 +82,18 @@ class PikoSensor(CoordinatorEntity, SensorEntity):
     @property
     def state(self):
         """Return the state of the device."""
+        _LOGGER.debug("Getting state for sensor %s. Coordinator data: %s", 
+                     self.type, self.coordinator.data is not None)
+        
         if not self.coordinator.data:
+            _LOGGER.debug("No coordinator data available for sensor %s", self.type)
             return None
             
         data = self.coordinator.data.get("data")
         ba_data = self.coordinator.data.get("ba_data")
+        
+        _LOGGER.debug("Sensor %s - data: %s, ba_data: %s", 
+                     self.type, data is not None, ba_data is not None)
         
         if data is not None:
             if self.type == "current_power":

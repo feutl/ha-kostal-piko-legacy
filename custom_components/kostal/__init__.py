@@ -25,7 +25,7 @@ from .const import DEFAULT_NAME, DOMAIN, SENSOR_TYPES, MIN_TIME_BETWEEN_UPDATES
 
 _LOGGER = logging.getLogger(__name__)
 
-__version__ = "1.4.0-alpha.1"
+__version__ = "1.4.0-alpha.2"
 VERSION = __version__
 
 CONFIG_SCHEMA = vol.Schema(
@@ -114,14 +114,31 @@ class KostalDataUpdateCoordinator(DataUpdateCoordinator):
         """Fetch data from Kostal Piko inverter."""
         try:
             # Run blocking update in executor
+            _LOGGER.debug("Starting data update for Kostal Piko")
             await self.hass.async_add_executor_job(self.piko.update)
             
+            # Check if data attributes exist
+            if not hasattr(self.piko, 'data'):
+                _LOGGER.error("Piko object has no 'data' attribute after update")
+                raise UpdateFailed("Piko object has no 'data' attribute")
+            
+            if not hasattr(self.piko, 'ba_data'):
+                _LOGGER.debug("Piko object has no 'ba_data' attribute (BA sensor may not be installed)")
+            
+            # Check if data was fetched successfully
+            _LOGGER.debug("Data update complete. Data: %s, BA Data: %s", 
+                         self.piko.data is not None, 
+                         getattr(self.piko, 'ba_data', None) is not None)
+            
             # Return both data and ba_data
-            return {
+            result = {
                 "data": self.piko.data,
-                "ba_data": self.piko.ba_data,
+                "ba_data": getattr(self.piko, 'ba_data', None),
             }
+            _LOGGER.debug("Returning coordinator data with %d keys", len(result))
+            return result
         except Exception as err:
+            _LOGGER.error("Error communicating with Kostal Piko: %s", err, exc_info=True)
             raise UpdateFailed(f"Error communicating with Kostal Piko: {err}") from err
 
 

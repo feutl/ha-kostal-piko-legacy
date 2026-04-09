@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0-alpha.2] - 2026-04-09
+
+### Fixed
+- Added extensive debug logging to diagnose "all entities unavailable" issue
+- Improved error handling in DataUpdateCoordinator with attribute checks
+- Better handling of missing ba_data attribute (for inverters without BA sensor)
+- More defensive checks for Piko object attributes after update
+
+### Debug
+- Added detailed logging in coordinator _async_update_data method
+- Added logging in sensor state property to track data flow
+- Logs now show when data/ba_data are None vs not present
+- Better exception logging with full tracebacks
+
+### Notes
+- This release includes debug logging to help diagnose availability issues
+- Please check Home Assistant logs (Configuration → Logs) and report findings
+- Set logger level to debug for 'custom_components.kostal' for detailed output
+
 ## [1.4.0-alpha.1] - 2026-04-08
 
 ### Added
