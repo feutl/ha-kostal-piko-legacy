@@ -1,6 +1,5 @@
 """The Kostal PIKO inverter sensor integration."""
 
-import asyncio
 import logging
 import voluptuous as vol
 
@@ -25,7 +24,7 @@ from .const import DEFAULT_NAME, DOMAIN, SENSOR_TYPES, MIN_TIME_BETWEEN_UPDATES
 
 _LOGGER = logging.getLogger(__name__)
 
-__version__ = "1.4.0-alpha.2"
+__version__ = "1.4.0-alpha.3"
 VERSION = __version__
 
 CONFIG_SCHEMA = vol.Schema(
@@ -85,7 +84,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         data = entry.data.copy()
         data.update(entry.options)
 
-    hass.data[DOMAIN][entry.entry_id] = KostalInstance(hass, entry, data)
+    instance = KostalInstance(hass, entry, data)
+    hass.data[DOMAIN][entry.entry_id] = instance
+    
+    # Initialize the instance (must happen during setup, not in background task)
+    await instance.start_up()
+    
     return True
 
 
@@ -122,6 +126,10 @@ class KostalDataUpdateCoordinator(DataUpdateCoordinator):
                 _LOGGER.error("Piko object has no 'data' attribute after update")
                 raise UpdateFailed("Piko object has no 'data' attribute")
             
+            if self.piko.data is None:
+                _LOGGER.error("Piko data is None after update - inverter may be offline or unreachable")
+                raise UpdateFailed("No data returned from inverter")
+            
             if not hasattr(self.piko, 'ba_data'):
                 _LOGGER.debug("Piko object has no 'ba_data' attribute (BA sensor may not be installed)")
             
@@ -135,8 +143,12 @@ class KostalDataUpdateCoordinator(DataUpdateCoordinator):
                 "data": self.piko.data,
                 "ba_data": getattr(self.piko, 'ba_data', None),
             }
-            _LOGGER.debug("Returning coordinator data with %d keys", len(result))
+            _LOGGER.debug("Returning coordinator data with %d keys. Data type: %s", 
+                         len(result), type(self.piko.data).__name__)
             return result
+        except UpdateFailed:
+            # Re-raise UpdateFailed as-is
+            raise
         except Exception as err:
             _LOGGER.error("Error communicating with Kostal Piko: %s", err, exc_info=True)
             raise UpdateFailed(f"Error communicating with Kostal Piko: {err}") from err
@@ -160,13 +172,19 @@ class KostalInstance:
 
         hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, self.stop)
 
-        asyncio.create_task(self.start_up())
-
     async def start_up(self):
         """Start up the Kostal instance."""
-        # Perform initial data fetch
-        await self.coordinator.async_config_entry_first_refresh()
-        self.add_sensors(self.conf[CONF_MONITORED_CONDITIONS])
+        try:
+            # Perform initial data fetch
+            _LOGGER.info("Performing initial data fetch for Kostal Piko")
+            await self.coordinator.async_config_entry_first_refresh()
+            _LOGGER.info("Initial data fetch successful. Last update success: %s", 
+                        self.coordinator.last_update_success)
+            _LOGGER.debug("Coordinator data: %s", self.coordinator.data)
+            self.add_sensors(self.conf[CONF_MONITORED_CONDITIONS])
+        except Exception as err:
+            _LOGGER.error("Failed to start up Kostal integration: %s", err, exc_info=True)
+            raise
 
     async def stop(self, _=None):
         """Stop Kostal."""

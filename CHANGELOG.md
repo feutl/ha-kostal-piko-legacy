@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0-alpha.3] - 2026-04-09
+
+### Fixed
+- **CRITICAL FIX**: Resolved ConfigEntryError that caused all entities to be unavailable
+- Fixed timing issue with `async_config_entry_first_refresh()` being called in wrong state
+- Coordinator first refresh now happens during setup phase (SETUP_IN_PROGRESS) not after (LOADED)
+- Changed from background task to awaited startup sequence
+
+### Changed
+- Removed unnecessary asyncio import
+- `start_up()` is now awaited in `async_setup_entry` instead of running as background task
+- Improved startup logging to show coordinator initialization status
+
+### Technical Details
+The issue was that `async_config_entry_first_refresh()` must be called while the config entry
+is in `ConfigEntryState.SETUP_IN_PROGRESS`, but we were calling it in a background task after
+`async_setup_entry` returned, when the state was already `ConfigEntryState.LOADED`.
+
 ## [1.4.0-alpha.2] - 2026-04-09
 
 ### Fixed
