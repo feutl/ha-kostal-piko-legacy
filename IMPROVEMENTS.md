@@ -131,16 +131,18 @@ self.hass.async_create_task(self._asyncadd_sensors(sensors, piko))
 
 ---
 
-### 2.2 Make Update Interval Configurable
+### 2.2 Configurable Connection Settings
 **Priority:** Medium  
-**Benefit:** Allow users to customize polling frequency based on their needs and inverter capabilities  
-**Current:** Hard-coded 30-second update interval in `const.py`  
-**Files:** `custom_components/kostal/const.py`, `config_flow.py`, `piko_holder.py`  
+**Benefit:** Allow users to customize network behavior and polling frequency based on their setup  
+**Files:** `custom_components/kostal/__init__.py`, `config_flow.py`, `const.py`
+
+#### 2.2.1 Configurable Update Interval
+**Current:** Hard-coded 30-second update interval in coordinator  
 **Action:** 
 - Add update interval to config flow (both initial setup and options flow)
 - Add configuration option with default of 30 seconds
 - Allow range of 10-300 seconds (configurable via UI)
-- Update `piko_holder.py` to use configured interval instead of constant
+- Pass interval to coordinator initialization
 
 **Implementation:**
 ```python
@@ -153,6 +155,13 @@ MAX_SCAN_INTERVAL = 300
 vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): vol.All(
     vol.Coerce(int), vol.Range(min=MIN_SCAN_INTERVAL, max=MAX_SCAN_INTERVAL)
 )
+
+# In __init__.py - coordinator initialization
+self.coordinator = KostalDataUpdateCoordinator(
+    hass, 
+    piko,
+    timedelta(seconds=conf.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL))
+)
 ```
 
 **Testing:** 
@@ -161,27 +170,44 @@ vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): vol.All(
 - Confirm options flow allows updating interval
 - Verify inverter isn't overloaded with frequent requests
 
----
+#### 2.2.2 Configurable Request Timeout
+**Current:** Uses kostalpiko library default timeout (typically 10-30 seconds)  
+**Action:**
+- Add timeout configuration to config flow and options flow
+- Pass timeout to Piko class initialization
+- Default: 30 seconds, Range: 5-120 seconds
 
-## Testing Checklist for v1.3.1
+**Use Cases:**
+- Remote monitoring over VPN or slow networks (increase timeout)
+- Quick failure detection for automations (decrease timeout)
+- WiFi interference or unstable connections (increase timeout)
 
-- ✅ Integration loads successfully
-- ✅ Config flow works for new installations  
-- ✅ Options flow allows updating sensors
-- ✅ All sensors update correctly
-- ✅ No deprecation warnings in logs
-- ✅ Compatible with HA 2026.3.0
-- ✅ Device appears correctly in Devices & Services
-- ✅ All sensor entities grouped under device
+**Implementation:**
+```python
+# In const.py
+DEFAULT_TIMEOUT = 30
+MIN_TIMEOUT = 5
+MAX_TIMEOUT = 120
 
----
+# In config_flow.py - add to schema
+vol.Optional(CONF_TIMEOUT, default=DEFAULT_TIMEOUT): vol.All(
+    vol.Coerce(int), vol.Range(min=MIN_TIMEOUT, max=MAX_TIMEOUT)
+)
 
-## Version History
+# In __init__.py - Piko initialization
+piko = Piko(
+    conf[CONF_HOST], 
+    conf[CONF_USERNAME], 
+    conf[CONF_PASSWORD],
+    timeout=conf.get(CONF_TIMEOUT, DEFAULT_TIMEOUT)
+)
+```
 
-- **v1.3.1** (2026-03-09): Stable release with all deprecation fixes
-- **v1.3.1-rc.1 to rc.6** (2026-03-06): Release candidates with incremental fixes
-- **v1.3.0** (2026-03-05): English-only simplification
-- **v1.2.0** (2026-03-05): Initial baseline release
+**Testing:**
+- Test with default timeout
+- Test with low timeout (5s) to verify quick failure
+- Test with high timeout (60s) over slow network
+- Verify error messages are clear when timeout occurs
 
 ---
 
