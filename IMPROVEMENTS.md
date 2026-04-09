@@ -4,6 +4,31 @@ This document outlines planned improvements for the Kostal Piko Legacy integrati
 
 ---
 
+## ✅ Completed in v1.4.0
+
+### ✅ DataUpdateCoordinator Implementation (Priority 2.1)
+**Released:** April 9, 2026  
+**Major refactoring to modern Home Assistant patterns**
+
+Key achievements:
+- Implemented `KostalDataUpdateCoordinator` for centralized data management
+- `PikoSensor` now extends `CoordinatorEntity` for automatic updates
+- Removed manual update methods in favor of coordinator pattern
+- Automatic retry logic and error handling with `UpdateFailed` exceptions
+- More efficient updates - prevents duplicate fetches
+- Sensors properly show unavailable when inverter is offline
+- Tested and verified working with real inverter
+
+### ✅ Error Handling Improvements (Priority 2.1) 
+**Released:** April 9, 2026
+
+- Comprehensive error handling throughout data update flow
+- Better exception logging and error messages
+- Graceful recovery when inverter comes back online
+- Proper availability management through CoordinatorEntity
+
+---
+
 ## ✅ Completed in v1.3.1
 
 ### ✅ Remove Deprecated Code
@@ -64,7 +89,7 @@ self.hass.async_create_task(self._asyncadd_sensors(sensors, piko))
 ---
 
 #### 1.6 Add Proper Error Handling ✅
-**Status:** COMPLETED in v1.4.0-dev  
+**Status:** COMPLETED in v1.4.0  
 **File:** `custom_components/kostal/sensor.py`  
 **Action:** Added error handling to sensor updates:
 - Initialize `_attr_available = True` in `__init__()`
@@ -76,7 +101,7 @@ self.hass.async_create_task(self._asyncadd_sensors(sensors, piko))
 ---
 
 #### 1.7 Implement DataUpdateCoordinator ✅
-**Status:** COMPLETED in v1.4.0-dev  
+**Status:** COMPLETED in v1.4.0  
 **Files:** `custom_components/kostal/__init__.py`, `sensor.py`  
 **Action:** Migrated from manual throttling to Home Assistant's `DataUpdateCoordinator` pattern:
 - Created `KostalDataUpdateCoordinator` class for centralized data fetching
@@ -91,7 +116,7 @@ self.hass.async_create_task(self._asyncadd_sensors(sensors, piko))
 - More efficient updates (prevents duplicate fetches)
 - Better error handling and logging
 - Follows modern HA best practices
-**Testing:** ⏳ Requires testing with real inverter
+**Testing:** ✅ Tested and verified working with real Kostal Piko inverter
 
 ---
 

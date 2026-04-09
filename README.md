@@ -23,16 +23,17 @@ This custom component integrates Kostal Piko inverters with Home Assistant, prov
 
 ## Version
 
-Current version: **1.3.1**
+Current version: **1.4.0**
 
 See [CHANGELOG.md](CHANGELOG.md) for version history and changes.
 
-**What's New in 1.3.1:**
-- ✅ Modernized for Home Assistant 2026.3.0
-- ✅ All deprecated code removed
-- ✅ Options flow support - update sensors after setup
-- ✅ Improved async patterns
-- ✅ Better maintainability
+**What's New in 1.4.0:**
+- ✅ Modern DataUpdateCoordinator pattern for efficient data fetching
+- ✅ Automatic retry logic for communication failures
+- ✅ Better error handling - sensors show unavailable when inverter is offline
+- ✅ More efficient updates - prevents duplicate fetches
+- ✅ Simplified code following Home Assistant 2026 best practices
+- ✅ CoordinatorEntity integration for automatic availability management
 
 ## Requirements
 
