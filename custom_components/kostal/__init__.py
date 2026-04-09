@@ -1,10 +1,10 @@
 """The Kostal PIKO inverter sensor integration."""
 
-import asyncio
 import logging
 import voluptuous as vol
 
-from .piko_holder import PikoHolder
+from datetime import timedelta
+from kostalpiko.kostalpiko import Piko
 
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.const import (
@@ -17,13 +17,14 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.dispatcher import async_dispatcher_send
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 import homeassistant.helpers.config_validation as cv
 
-from .const import DEFAULT_NAME, DOMAIN, SENSOR_TYPES
+from .const import DEFAULT_NAME, DOMAIN, SENSOR_TYPES, MIN_TIME_BETWEEN_UPDATES
 
 _LOGGER = logging.getLogger(__name__)
 
-__version__ = "1.3.1"
+__version__ = "1.4.0"
 VERSION = __version__
 
 CONFIG_SCHEMA = vol.Schema(
@@ -83,7 +84,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         data = entry.data.copy()
         data.update(entry.options)
 
-    hass.data[DOMAIN][entry.entry_id] = KostalInstance(hass, entry, data)
+    instance = KostalInstance(hass, entry, data)
+    hass.data[DOMAIN][entry.entry_id] = instance
+    
+    # Initialize the instance (must happen during setup, not in background task)
+    await instance.start_up()
+    
     return True
 
 
@@ -95,6 +101,45 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     return True
 
 
+class KostalDataUpdateCoordinator(DataUpdateCoordinator):
+    """Class to manage fetching Kostal Piko data."""
+
+    def __init__(self, hass: HomeAssistant, piko: Piko):
+        """Initialize the coordinator."""
+        super().__init__(
+            hass,
+            _LOGGER,
+            name=DOMAIN,
+            update_interval=MIN_TIME_BETWEEN_UPDATES,
+        )
+        self.piko = piko
+
+    async def _async_update_data(self):
+        """Fetch data from Kostal Piko inverter."""
+        try:
+            # Run blocking update in executor
+            await self.hass.async_add_executor_job(self.piko.update)
+            
+            # Check if data attributes exist
+            if not hasattr(self.piko, 'data'):
+                raise UpdateFailed("Piko object has no 'data' attribute")
+            
+            if self.piko.data is None:
+                raise UpdateFailed("No data returned from inverter")
+            
+            # Return both data and ba_data
+            return {
+                "data": self.piko.data,
+                "ba_data": getattr(self.piko, 'ba_data', None),
+            }
+        except UpdateFailed:
+            # Re-raise UpdateFailed as-is
+            raise
+        except Exception as err:
+            _LOGGER.error("Error communicating with Kostal Piko: %s", err)
+            raise UpdateFailed(f"Error communicating with Kostal Piko: {err}") from err
+
+
 class KostalInstance:
     """Config instance of Kostal."""
 
@@ -104,33 +149,35 @@ class KostalInstance:
         self.config_entry = entry
         self.entry_id = self.config_entry.entry_id
         self.conf = conf
-        self.piko = PikoHolder(
-            conf[CONF_HOST], conf[CONF_USERNAME], conf[CONF_PASSWORD]
-        )
+        
+        # Create Piko instance (using raw Piko from library, not PikoHolder)
+        piko = Piko(conf[CONF_HOST], conf[CONF_USERNAME], conf[CONF_PASSWORD])
+        
+        # Create coordinator for data updates
+        self.coordinator = KostalDataUpdateCoordinator(hass, piko)
 
         hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, self.stop)
 
-        asyncio.create_task(self.start_up())
-
     async def start_up(self):
         """Start up the Kostal instance."""
-        await self.hass.async_add_executor_job(self.piko.update)
-        self.add_sensors(self.conf[CONF_MONITORED_CONDITIONS], self.piko)
+        # Perform initial data fetch
+        await self.coordinator.async_config_entry_first_refresh()
+        self.add_sensors(self.conf[CONF_MONITORED_CONDITIONS])
 
     async def stop(self, _=None):
         """Stop Kostal."""
         _LOGGER.info("Shutting down Kostal")
 
-    def add_sensors(self, sensors, piko: PikoHolder):
+    def add_sensors(self, sensors):
         """Add sensors."""
-        self.hass.async_create_task(self._asyncadd_sensors(sensors, piko))
+        self.hass.async_create_task(self._asyncadd_sensors(sensors))
 
-    async def _asyncadd_sensors(self, sensors, piko: PikoHolder):
+    async def _asyncadd_sensors(self, sensors):
         """Add sensors asynchronously."""
         await self.hass.config_entries.async_forward_entry_setups(
             self.config_entry, ["sensor"]
         )
-        async_dispatcher_send(self.hass, "kostal_init_sensors", sensors, piko)
+        async_dispatcher_send(self.hass, "kostal_init_sensors", sensors, self.coordinator)
 
     async def clean(self):
         """Clean up."""

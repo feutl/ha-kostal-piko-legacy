@@ -4,6 +4,31 @@ This document outlines planned improvements for the Kostal Piko Legacy integrati
 
 ---
 
+## ✅ Completed in v1.4.0
+
+### ✅ DataUpdateCoordinator Implementation (Priority 2.1)
+**Released:** April 9, 2026  
+**Major refactoring to modern Home Assistant patterns**
+
+Key achievements:
+- Implemented `KostalDataUpdateCoordinator` for centralized data management
+- `PikoSensor` now extends `CoordinatorEntity` for automatic updates
+- Removed manual update methods in favor of coordinator pattern
+- Automatic retry logic and error handling with `UpdateFailed` exceptions
+- More efficient updates - prevents duplicate fetches
+- Sensors properly show unavailable when inverter is offline
+- Tested and verified working with real inverter
+
+### ✅ Error Handling Improvements (Priority 2.1) 
+**Released:** April 9, 2026
+
+- Comprehensive error handling throughout data update flow
+- Better exception logging and error messages
+- Graceful recovery when inverter comes back online
+- Proper availability management through CoordinatorEntity
+
+---
+
 ## ✅ Completed in v1.3.1
 
 ### ✅ Remove Deprecated Code
@@ -63,48 +88,41 @@ self.hass.async_create_task(self._asyncadd_sensors(sensors, piko))
 
 ---
 
+#### 1.6 Add Proper Error Handling ✅
+**Status:** COMPLETED in v1.4.0  
+**File:** `custom_components/kostal/sensor.py`  
+**Action:** Added error handling to sensor updates:
+- Initialize `_attr_available = True` in `__init__()`
+- Wrap `_update()` method in try-except block
+- Set `_attr_available = False` on errors
+- Log errors with sensor type and exception details
+**Testing:** ✅ Sensors gracefully handle inverter offline/network failures
+
+---
+
+#### 1.7 Implement DataUpdateCoordinator ✅
+**Status:** COMPLETED in v1.4.0  
+**Files:** `custom_components/kostal/__init__.py`, `sensor.py`  
+**Action:** Migrated from manual throttling to Home Assistant's `DataUpdateCoordinator` pattern:
+- Created `KostalDataUpdateCoordinator` class for centralized data fetching
+- Coordinator handles 30-second update interval automatically
+- `PikoSensor` now extends `CoordinatorEntity`
+- Removed manual `async_update()` and `_update()` methods
+- State computed from `self.coordinator.data`
+- Automatic error handling with `UpdateFailed` exceptions
+- `piko_holder.py` no longer used (can be removed in future cleanup)
+**Benefits:**
+- Automatic retry logic on communication failures
+- More efficient updates (prevents duplicate fetches)
+- Better error handling and logging
+- Follows modern HA best practices
+**Testing:** ✅ Tested and verified working with real Kostal Piko inverter
+
+---
+
 ## Priority 2: Future Enhancements
 
-### 2.1 Add Proper Error Handling
-**File:** `custom_components/kostal/sensor.py`  
-**Function:** `_update()` (line ~131)  
-**Action:** Wrap data fetching in try-except block:
-```python
-def _update(self):
-    """Update data."""
-    try:
-        self.piko.update()
-        data = self.piko.data
-        ba_data = self.piko.ba_data
-        
-        if data is not None:
-            # ... existing code ...
-            
-        if ba_data is not None:
-            # ... existing code ...
-            
-        self._attr_available = True
-    except Exception as e:
-        _LOGGER.error("Error updating sensor %s: %s", self.type, e)
-        self._attr_available = False
-```
-**Testing:** 
-- Unplug network cable or turn off inverter
-- Verify sensors show as "unavailable" in HA
-- Reconnect and verify sensors come back online
-
----
-
-### 2.2 Implement DataUpdateCoordinator
-**Priority:** Medium  
-**Benefit:** Better error handling, automatic retry logic, and more efficient updates  
-**Files:** `custom_components/kostal/__init__.py`, `sensor.py`  
-**Action:** Migrate from manual throttling to Home Assistant's `DataUpdateCoordinator` pattern  
-**Testing:** Comprehensive testing of all sensor updates and error scenarios
-
----
-
-### 2.3 Add Device Diagnostics
+### 2.1 Add Device Diagnostics
 **Priority:** Low  
 **Benefit:** Better debugging capabilities for users and developers  
 **File:** `custom_components/kostal/diagnostics.py` (new)  
@@ -113,7 +131,7 @@ def _update(self):
 
 ---
 
-### 2.4 Make Update Interval Configurable
+### 2.2 Make Update Interval Configurable
 **Priority:** Medium  
 **Benefit:** Allow users to customize polling frequency based on their needs and inverter capabilities  
 **Current:** Hard-coded 30-second update interval in `const.py`  
@@ -164,18 +182,6 @@ vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): vol.All(
 - **v1.3.1-rc.1 to rc.6** (2026-03-06): Release candidates with incremental fixes
 - **v1.3.0** (2026-03-05): English-only simplification
 - **v1.2.0** (2026-03-05): Initial baseline release
-
----
-
-### 2.2 Add _attr_available Property
-**File:** `custom_components/kostal/sensor.py`  
-**Class:** `PikoSensor`  
-**Action:** Initialize in `__init__()`:
-```python
-self._attr_available = True
-```
-**Why:** Allows sensors to show as unavailable when inverter is offline.  
-**Testing:** See 2.1 testing steps.
 
 ---
 

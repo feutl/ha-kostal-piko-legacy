@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-04-09
+
+### Added
+- Implemented modern DataUpdateCoordinator pattern for efficient data fetching
+- Automatic retry logic for failed inverter communication
+- Better error handling with UpdateFailed exceptions
+- Comprehensive error handling for sensor updates
+- Sensors now properly show "unavailable" when inverter is offline
+
+### Changed
+- **BREAKING**: Major refactoring to use DataUpdateCoordinator pattern
+- PikoSensor now extends CoordinatorEntity for automatic updates
+- Removed manual async_update() and _update() methods from sensors
+- Using raw Piko class from library instead of PikoHolder wrapper
+- State property now computes directly from coordinator data
+- More efficient updates - coordinator prevents duplicate fetches
+- Coordinator initialization moved to setup phase (fixes ConfigEntryError)
+
+### Improved
+- Better logging of errors with exception details
+- Simplified sensor code following modern HA 2026 patterns
+- Automatic update scheduling via coordinator (30-second intervals)
+- Graceful recovery when inverter comes back online
+- Cleaner async code structure
+
+### Fixed
+- Fixed ConfigEntryError during integration setup
+- Fixed timing issue with coordinator first refresh
+- Better handling of missing ba_data attribute (for inverters without BA sensor)
+- Proper availability handling through CoordinatorEntity
+
+### Technical Details
+- Coordinator manages all data fetching and error handling
+- First refresh happens during SETUP_IN_PROGRESS state (not LOADED)
+- CoordinatorEntity automatically handles sensor availability
+- UpdateFailed exceptions properly propagated for retry logic
+
 ## [1.3.1] - 2026-03-09
 
 ### Fixed
